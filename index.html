@@ -27,13 +27,13 @@
             transition: transform 0.3s ease;
         }
         .card.red {
-            color: #ef4444; 
+            color: #ef4444; /* red-500 */
         }
         .card.black {
-            color: #111827; 
+            color: #111827; /* gray-900 */
         }
         .card-back {
-            background-color: #3b82f6; 
+            background-color: #3b82f6; /* blue-500 */
             background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 10px, transparent 10px, transparent 20px);
         }
         .card-suit {
@@ -51,7 +51,7 @@
             transform: rotate(180deg);
         }
         .game-board {
-            background-color: #166534; 
+            background-color: #166534; /* green-800 */
         }
         .btn-action {
             transition: background-color 0.2s ease, transform 0.1s ease;
@@ -71,38 +71,74 @@
         }
         .chip.selected {
             transform: scale(1.15);
-            box-shadow: 0 0 15px #facc15; 
+            box-shadow: 0 0 15px #facc15; /* yellow-400 */
         }
         #message-box {
             transition: opacity 0.5s ease-in-out;
         }
+        /* Styles for the bet stack area */
+        #bet-stack-container {
+            display: flex;
+            gap: 8px; /* Space between chip stacks */
+            align-items: flex-end;
+            min-width: 240px; /* Accommodate up to 4 stacks */
+            height: 150px;
+            padding-right: 20px;
+        }
+        .bet-stack {
+            position: relative;
+            width: 60px;
+            height: 100%;
+        }
+        .bet-chip {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: white;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            transition: all 0.2s ease-out;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
-    <div id="game-container" class="w-full max-w-7xl mx-auto p-4">
-        <div class="game-board rounded-3xl shadow-2xl p-4 md:p-8 relative">
+    <div id="game-container" class="w-full max-w-7xl mx-auto">
+        <!-- The main game board now uses a flex column layout to structure its main sections -->
+        <div class="game-board rounded-3xl shadow-2xl p-4 md:p-8 flex flex-col justify-between min-h-[90vh]">
 
             <!-- Dealer's Area -->
-            <div class="text-center mb-8 h-48">
+            <div class="text-center">
                 <h2 class="text-2xl font-bold uppercase tracking-wider text-gray-300">Dealer's Hand <span id="dealer-score" class="ml-2 px-3 py-1 bg-gray-900/50 rounded-lg"></span></h2>
                 <div id="dealer-hand" class="flex justify-center items-center mt-4 space-x-2 min-h-[140px]"></div>
             </div>
 
-            <!-- Player's Area -->
-            <div class="text-center mt-8 h-64">
-                 <div id="player-hands-container" class="flex justify-center items-start space-x-8">
-                    <!-- Hands will be dynamically inserted here -->
-                 </div>
+            <!-- This middle section holds the player hands and the message box -->
+            <div class="flex-grow flex flex-col justify-center items-center my-4">
+                <!-- Player's Area now includes the bet stack -->
+                <div class="flex justify-center items-center">
+                    <div id="bet-stack-container"></div>
+                    <div id="player-hands-container" class="flex justify-center items-start space-x-8 min-h-[260px]">
+                       <!-- Hands will be dynamically inserted here -->
+                    </div>
+                </div>
+                 <!-- Message Box - Moved into the main layout flow -->
+                <div id="message-box" class="text-center h-16 flex items-center justify-center">
+                    <p id="message" class="text-3xl font-bold text-white drop-shadow-lg"></p>
+                </div>
             </div>
 
-             <!-- Message Box -->
-            <div id="message-box" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p id="message" class="text-4xl font-bold text-white drop-shadow-lg"></p>
-            </div>
-
-            <!-- Game Info & Controls -->
-            <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+            <!-- Game Info & Controls - No longer absolutely positioned -->
+            <div class="w-full flex justify-between items-end">
                 <!-- Bank & Bet -->
                 <div class="text-left bg-black/30 p-4 rounded-xl">
                     <p class="text-lg">Bank: <span id="bank" class="font-bold text-yellow-300"></span></p>
@@ -116,6 +152,7 @@
                         <button data-value="10" class="chip w-12 h-12 rounded-full bg-blue-600 border-2 border-white/50 font-bold text-lg shadow-md focus:outline-none">$10</button>
                         <button data-value="25" class="chip w-12 h-12 rounded-full bg-green-600 border-2 border-white/50 font-bold text-lg shadow-md focus:outline-none">$25</button>
                         <button data-value="100" class="chip w-12 h-12 rounded-full bg-black border-2 border-white/50 font-bold text-lg shadow-md focus:outline-none">$100</button>
+                        <button data-value="1000" class="chip w-12 h-12 rounded-full bg-yellow-500 border-2 border-white/50 font-bold text-lg shadow-md focus:outline-none">$1k</button>
                     </div>
                     <button id="deal-button" class="btn-action bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-lg shadow-lg uppercase tracking-wider text-lg">Deal</button>
                 </div>
@@ -141,6 +178,7 @@
         const currentBetEl = document.getElementById('current-bet');
         const messageEl = document.getElementById('message');
         const messageBoxEl = document.getElementById('message-box');
+        const betStackContainerEl = document.getElementById('bet-stack-container');
 
         const bettingControlsEl = document.getElementById('betting-controls');
         const actionControlsEl = document.getElementById('action-controls');
@@ -156,14 +194,17 @@
         let deck = [];
         let playerHands = [];
         let dealerHand = [];
-        let bank = 1000;
+        let bank = 10000; // Increased starting bank for bigger bets
         let currentBet = 0;
+        let placedBets = []; // Array to track individual chip clicks
         let activeHandIndex = 0;
         let insuranceBet = 0;
 
-        // --- Card Constants ---
-        const suits = ['♠', '♥', '♦', '♣'];
-        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        // --- Constants ---
+        const SUITS = ['♠', '♥', '♦', '♣'];
+        const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const MAX_CHIPS_PER_STACK = 10;
+        const MAX_STACKS = 4;
 
         // --- Game Logic ---
 
@@ -171,8 +212,8 @@
             deck = [];
             // Using 4 decks for a more realistic shoe
             for (let i = 0; i < 4; i++) {
-                for (const suit of suits) {
-                    for (const rank of ranks) {
+                for (const suit of SUITS) {
+                    for (const rank of RANKS) {
                         deck.push({ rank, suit });
                     }
                 }
@@ -222,44 +263,87 @@
             }
             return cardEl;
         }
+        
+        function renderBetStack() {
+            betStackContainerEl.innerHTML = '';
+            if (placedBets.length === 0) return;
+
+            const stackElements = [];
+
+            placedBets.forEach((value, i) => {
+                const stackIndex = Math.floor(i / MAX_CHIPS_PER_STACK);
+                if (stackIndex >= MAX_STACKS) return; // Stop rendering chips if we exceed max stacks
+
+                if (!stackElements[stackIndex]) {
+                    const stackDiv = document.createElement('div');
+                    stackDiv.className = 'bet-stack';
+                    betStackContainerEl.appendChild(stackDiv);
+                    stackElements.push(stackDiv);
+                }
+
+                const chipIndexInStack = i % MAX_CHIPS_PER_STACK;
+                
+                const chipEl = document.createElement('div');
+                chipEl.classList.add('bet-chip');
+                let colorClass = '';
+                let textContent = '';
+
+                if (value === 1000) { colorClass = 'bg-yellow-500'; textContent = '$1k'; }
+                else if (value === 100) { colorClass = 'bg-black'; textContent = '$100'; }
+                else if (value === 25) { colorClass = 'bg-green-600'; textContent = '$25'; }
+                else if (value === 10) { colorClass = 'bg-blue-600'; textContent = '$10'; }
+                else if (value === 5) { colorClass = 'bg-red-600'; textContent = '$5'; }
+
+                chipEl.classList.add(colorClass);
+                chipEl.textContent = textContent;
+                chipEl.style.bottom = `${chipIndexInStack * 8}px`; // Stacking effect
+                chipEl.style.zIndex = chipIndexInStack;
+                
+                stackElements[stackIndex].appendChild(chipEl);
+            });
+        }
+
 
         function renderHands() {
             // Render Dealer Hand
             dealerHandEl.innerHTML = '';
             dealerHand.forEach((card, index) => {
-                // Hide first card until player's turn is over
                 const faceUp = index !== 0 || playerHands.every(hand => hand.status !== 'playing');
                 dealerHandEl.appendChild(createCardElement(card, faceUp));
             });
 
             // Render Player Hands
             playerHandsContainerEl.innerHTML = '';
-            playerHands.forEach((hand, index) => {
-                const handWrapper = document.createElement('div');
-                handWrapper.classList.add('text-center', 'p-2', 'rounded-lg');
-                if (index === activeHandIndex && hand.status === 'playing') {
-                    handWrapper.classList.add('bg-yellow-400/20', 'shadow-lg');
-                }
+            if (playerHands.length === 0 && currentBet === 0) {
+                 playerHandsContainerEl.innerHTML = `<div class="text-gray-400 text-2xl flex items-center justify-center h-full w-64">Place Your Bet</div>`;
+            } else {
+                playerHands.forEach((hand, index) => {
+                    const handWrapper = document.createElement('div');
+                    handWrapper.classList.add('text-center', 'p-2', 'rounded-lg');
+                    if (index === activeHandIndex && hand.status === 'playing') {
+                        handWrapper.classList.add('bg-yellow-400/20', 'shadow-lg');
+                    }
 
-                const handTitle = document.createElement('h2');
-                handTitle.className = 'text-xl font-bold uppercase tracking-wider text-gray-300 mb-2';
-                handTitle.innerHTML = `Your Hand <span class="ml-2 px-3 py-1 bg-gray-900/50 rounded-lg">${getHandScore(hand.cards)}</span>`;
-                
-                const handCardsEl = document.createElement('div');
-                handCardsEl.className = 'flex justify-center items-center mt-2 space-x-2 min-h-[140px]';
-                hand.cards.forEach(card => {
-                    handCardsEl.appendChild(createCardElement(card));
+                    const handTitle = document.createElement('h2');
+                    handTitle.className = 'text-xl font-bold uppercase tracking-wider text-gray-300 mb-2';
+                    handTitle.innerHTML = `Your Hand <span class="ml-2 px-3 py-1 bg-gray-900/50 rounded-lg">${getHandScore(hand.cards)}</span>`;
+                    
+                    const handCardsEl = document.createElement('div');
+                    handCardsEl.className = 'flex justify-center items-center mt-2 space-x-2 min-h-[140px]';
+                    hand.cards.forEach(card => {
+                        handCardsEl.appendChild(createCardElement(card));
+                    });
+                    
+                    handWrapper.appendChild(handTitle);
+                    handWrapper.appendChild(handCardsEl);
+                    playerHandsContainerEl.appendChild(handWrapper);
                 });
-                
-                handWrapper.appendChild(handTitle);
-                handWrapper.appendChild(handCardsEl);
-                playerHandsContainerEl.appendChild(handWrapper);
-            });
+            }
 
             // Render Scores
             const dealerScore = getHandScore(dealerHand);
             const playerIsDone = playerHands.every(hand => hand.status !== 'playing');
-            dealerScoreEl.textContent = playerIsDone ? dealerScore : getCardValue(dealerHand[1]);
+            dealerScoreEl.textContent = dealerHand.length > 0 ? (playerIsDone ? dealerScore : getCardValue(dealerHand[1])) : '';
 
             updateBankAndBet();
         }
@@ -274,6 +358,7 @@
             messageBoxEl.style.opacity = 1;
             if (duration) {
                 setTimeout(() => {
+                    messageEl.textContent = '';
                     messageBoxEl.style.opacity = 0;
                 }, duration);
             }
@@ -296,13 +381,14 @@
             const canSplit = hand.cards.length === 2 && getCardValue(hand.cards[0]) === getCardValue(hand.cards[1]) && bank >= hand.bet;
             splitButton.disabled = !canSplit;
             
-            const dealerHasAce = dealerHand[1].rank === 'A';
+            const dealerHasAce = dealerHand.length > 1 && dealerHand[1].rank === 'A';
             insuranceButton.style.display = dealerHasAce && hand.cards.length === 2 ? 'inline-block' : 'none';
             insuranceButton.disabled = insuranceBet > 0;
         }
 
         function startNewRound() {
             currentBet = 0;
+            placedBets = []; // Clear the placed bets array
             insuranceBet = 0;
             playerHands = [];
             dealerHand = [];
@@ -319,9 +405,9 @@
             dealButton.disabled = true;
 
             renderHands();
+            renderBetStack(); // Clear the visual stack
             updateBankAndBet();
             dealerScoreEl.textContent = '';
-            playerHandsContainerEl.innerHTML = `<div class="text-gray-400 text-2xl">Place Your Bet</div>`;
         }
         
         function handleBet(amount) {
@@ -330,9 +416,12 @@
                 return;
             }
             currentBet += amount;
+            placedBets.push(amount); // Add bet to our tracking array
             bank -= amount;
             dealButton.disabled = false;
             updateBankAndBet();
+            renderBetStack(); // Update the visual stack
+            playerHandsContainerEl.innerHTML = ''; // Clear "Place your bet" message
         }
 
         function deal() {
@@ -354,14 +443,14 @@
             
             activeHandIndex = 0;
             renderHands();
-            updateActionButtons();
             
-            // Check for initial blackjacks
             const playerScore = getHandScore(playerHands[0].cards);
             const dealerScore = getHandScore(dealerHand);
             
-            if (playerScore === 21 || dealerScore === 21) {
+            if (playerScore === 21 || (dealerScore === 21 && getCardValue(dealerHand[1]) === 11)) { 
                 setTimeout(endRound, 1000);
+            } else {
+                updateActionButtons();
             }
         }
         
@@ -374,23 +463,22 @@
             
             const score = getHandScore(hand.cards);
             if (score >= 21) {
-                playerStand();
+                setTimeout(playerStand, 500);
             } else {
                 updateActionButtons();
             }
         }
 
         function playerStand() {
+            if (activeHandIndex >= playerHands.length) return;
             playerHands[activeHandIndex].status = getHandScore(playerHands[activeHandIndex].cards) > 21 ? 'bust' : 'stood';
             
-            // Move to next hand if available (after a split)
             const nextHandIndex = playerHands.findIndex(hand => hand.status === 'playing');
             if (nextHandIndex !== -1) {
                 activeHandIndex = nextHandIndex;
                 renderHands();
                 updateActionButtons();
             } else {
-                // All player hands are done, start dealer's turn
                 dealerTurn();
             }
         }
@@ -402,15 +490,19 @@
                 return;
             }
             bank -= hand.bet;
+            currentBet += hand.bet;
             hand.bet *= 2;
-            currentBet += (hand.bet / 2); // Update total bet display
+            
+            // Visually double the chip stack
+            const originalBets = [...placedBets];
+            originalBets.forEach(betValue => placedBets.push(betValue));
+            renderBetStack();
             
             hand.cards.push(deck.pop());
             renderHands();
             updateBankAndBet();
             
-            // After doubling, player must stand
-            setTimeout(playerStand, 500);
+            setTimeout(playerStand, 1000);
         }
 
         function playerSplit() {
@@ -434,6 +526,8 @@
 
             renderHands();
             updateActionButtons();
+            // Note: A more complex UI would show two separate bet stacks here.
+            // For simplicity, we'll keep one master stack visual for the total bet.
         }
 
         function takeInsurance() {
@@ -451,19 +545,15 @@
 
         function dealerTurn() {
             actionControlsEl.classList.add('hidden');
+            renderHands(); 
             
-            // Reveal dealer's hole card
-            renderHands();
-            
-            let dealerScore = getHandScore(dealerHand);
-            if (getHandScore(playerHands[0].cards) === 21 && playerHands[0].cards.length === 2 && dealerScore === 21) {
-                // Player has BJ, but dealer might too. End here.
+            if (playerHands.every(h => h.status === 'bust')) {
                 setTimeout(endRound, 1000);
                 return;
             }
 
             const interval = setInterval(() => {
-                dealerScore = getHandScore(dealerHand);
+                let dealerScore = getHandScore(dealerHand);
                 if (dealerScore < 17) {
                     dealerHand.push(deck.pop());
                     renderHands();
@@ -478,57 +568,67 @@
             const dealerScore = getHandScore(dealerHand);
             const dealerHasBlackjack = dealerScore === 21 && dealerHand.length === 2;
 
-            // Settle insurance bet first
             if (insuranceBet > 0) {
                 if (dealerHasBlackjack) {
-                    bank += insuranceBet * 3; // Original bet back + 2:1 payout
+                    bank += insuranceBet * 3;
                     showMessage("Insurance pays out!", 2000);
                 } else {
                     showMessage("Insurance lost.", 2000);
                 }
             }
 
-            playerHands.forEach(hand => {
+            let messageQueue = [];
+
+            playerHands.forEach((hand, index) => {
                 const playerScore = getHandScore(hand.cards);
                 const playerHasBlackjack = playerScore === 21 && hand.cards.length === 2;
+                const handLabel = playerHands.length > 1 ? `Hand ${index + 1}` : "You";
 
-                if (hand.status === 'bust' || playerScore > 21) {
-                    // Player already lost
+                if (hand.status === 'bust') {
+                    messageQueue.push(`${handLabel} busted!`);
+                } else if (dealerHasBlackjack) {
+                     if(playerHasBlackjack) {
+                        messageQueue.push(`${handLabel} pushes!`);
+                        bank += hand.bet;
+                     } else {
+                        messageQueue.push(`Dealer Blackjack! ${handLabel} lose.`);
+                     }
+                } else if (playerHasBlackjack) {
+                    bank += hand.bet * 2.5;
+                    messageQueue.push(`Blackjack! ${handLabel} wins!`);
                 } else if (dealerScore > 21 || playerScore > dealerScore) {
-                    // Player wins
-                    if (playerHasBlackjack) {
-                        bank += hand.bet * 2.5; // 3:2 payout for Blackjack
-                        showMessage("Blackjack!", 2000);
-                    } else {
-                        bank += hand.bet * 2;
-                        showMessage("You win!", 2000);
-                    }
+                    bank += hand.bet * 2;
+                    messageQueue.push(`${handLabel} win!`);
                 } else if (playerScore === dealerScore) {
-                    // Push
                     bank += hand.bet;
-                    showMessage("Push!", 2000);
+                    messageQueue.push(`${handLabel} pushes!`);
                 } else {
-                    // Player loses
-                    if (dealerHasBlackjack) {
-                        showMessage("Dealer has Blackjack!", 2000);
-                    } else {
-                        showMessage("Dealer wins!", 2000);
-                    }
+                    messageQueue.push(`${handLabel} lose.`);
                 }
             });
 
-            // Reveal dealer's full hand and score at the end
-            renderHands();
-            dealerScoreEl.textContent = getHandScore(dealerHand);
-
-            setTimeout(() => {
-                if (bank > 0) {
-                    startNewRound();
+            let i = 0;
+            function showNextMessage() {
+                if (i < messageQueue.length) {
+                    showMessage(messageQueue[i], 1500);
+                    i++;
+                    setTimeout(showNextMessage, 1600);
                 } else {
-                    showMessage("Game Over! You're out of money.", 5000);
-                    bettingControlsEl.classList.add('hidden');
+                    renderHands();
+                    dealerScoreEl.textContent = getHandScore(dealerHand);
+
+                    setTimeout(() => {
+                        if (bank > 0) {
+                            startNewRound();
+                        } else {
+                            showMessage("Game Over! You're out of money.", 5000);
+                            bettingControlsEl.classList.add('hidden');
+
+                        }
+                    }, 2000);
                 }
-            }, 3000);
+            }
+            showNextMessage();
         }
 
         // --- Event Listeners ---
