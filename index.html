@@ -81,9 +81,7 @@
             display: flex;
             gap: 8px; /* Space between chip stacks */
             align-items: flex-end;
-            min-width: 240px; /* Accommodate up to 4 stacks */
             height: 150px;
-            padding-right: 20px;
         }
         .bet-stack {
             position: relative;
@@ -124,20 +122,25 @@
 
             <!-- This middle section holds the player hands and the message box -->
             <div class="flex-grow flex flex-col justify-center items-center my-4">
-                <!-- Player's Area now includes the bet stack -->
-                <div class="flex justify-center items-center">
-                    <div id="bet-stack-container"></div>
-                    <div id="player-hands-container" class="flex justify-center items-start space-x-8 min-h-[260px]">
-                       <!-- Hands will be dynamically inserted here -->
+                <!-- Player's Area now uses a 3-column layout to ensure the hand is centered -->
+                <div class="flex items-center w-full">
+                    <div class="w-1/4 flex justify-end pr-8">
+                         <div id="bet-stack-container"></div>
                     </div>
+                    <div class="w-1/2 flex justify-center">
+                        <div id="player-hands-container" class="flex justify-center items-start space-x-8 min-h-[260px]">
+                           <!-- Hands will be dynamically inserted here -->
+                        </div>
+                    </div>
+                    <div class="w-1/4"></div> <!-- Spacer div to balance the layout -->
                 </div>
-                 <!-- Message Box - Moved into the main layout flow -->
+                 <!-- Message Box -->
                 <div id="message-box" class="text-center h-16 flex items-center justify-center">
                     <p id="message" class="text-3xl font-bold text-white drop-shadow-lg"></p>
                 </div>
             </div>
 
-            <!-- Game Info & Controls - No longer absolutely positioned -->
+            <!-- Game Info & Controls -->
             <div class="w-full flex justify-between items-end">
                 <!-- Bank & Bet -->
                 <div class="text-left bg-black/30 p-4 rounded-xl">
@@ -315,7 +318,7 @@
             // Render Player Hands
             playerHandsContainerEl.innerHTML = '';
             if (playerHands.length === 0 && currentBet === 0) {
-                 playerHandsContainerEl.innerHTML = `<div class="text-gray-400 text-2xl flex items-center justify-center h-full w-64">Place Your Bet</div>`;
+                 playerHandsContainerEl.innerHTML = `<div class="text-gray-400 text-2xl flex items-center justify-center h-full">Place Your Bet</div>`;
             } else {
                 playerHands.forEach((hand, index) => {
                     const handWrapper = document.createElement('div');
@@ -460,12 +463,12 @@
 
             hand.cards.push(deck.pop());
             renderHands();
+            updateActionButtons(); // Immediately update button states
             
             const score = getHandScore(hand.cards);
             if (score >= 21) {
+                // The timeout for automatically standing is still good for UX
                 setTimeout(playerStand, 500);
-            } else {
-                updateActionButtons();
             }
         }
 
@@ -623,7 +626,6 @@
                         } else {
                             showMessage("Game Over! You're out of money.", 5000);
                             bettingControlsEl.classList.add('hidden');
-
                         }
                     }, 2000);
                 }
