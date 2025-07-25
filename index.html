@@ -598,7 +598,7 @@
                      }
                 } else if (playerHasBlackjack) {
                     bank += hand.bet * 2.5;
-                    messageQueue.push(`Blackjack! ${handLabel} wins!`);
+                    messageQueue.push(`Blackjack! ${handLabel} win!`);
                 } else if (dealerScore > 21 || playerScore > dealerScore) {
                     bank += hand.bet * 2;
                     messageQueue.push(`${handLabel} win!`);
